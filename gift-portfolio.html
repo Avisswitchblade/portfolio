@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gift Mwirigi Maina — Software Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --fg: #f0ede8;
+    --fg-muted: #6b6760;
+    --accent: #C8A96E;
+    --accent-dim: rgba(200,169,110,0.12);
+    --border: rgba(240,237,232,0.08);
+    --transition: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f2ed;
+    --bg2: #ede9e2;
+    --fg: #0f0d0a;
+    --fg-muted: #8a8580;
+    --accent: #9a7a3a;
+    --accent-dim: rgba(154,122,58,0.10);
+    --border: rgba(15,13,10,0.10);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, background 0.3s;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(200,169,110,0.4);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s var(--transition), width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  .cursor-ring.hovered {
+    width: 60px; height: 60px;
+    border-color: var(--accent);
+  }
+
+  /* LOADER */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: opacity 0.8s var(--transition), visibility 0.8s;
+  }
+  #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .loader-terminal {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(11px, 1.2vw, 13px);
+    color: var(--fg-muted);
+    letter-spacing: 0.05em;
+    line-height: 2;
+    max-width: 420px;
+    width: 90%;
+  }
+  .loader-terminal .line { opacity: 0; animation: fadeInLine 0.3s forwards; }
+  .loader-terminal .line.accent { color: var(--accent); }
+  .loader-terminal .line.bright { color: var(--fg); }
+  .loader-bar-wrap {
+    margin-top: 32px;
+    width: 200px;
+    height: 1px;
+    background: var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+  .loader-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.05s linear;
+  }
+  @keyframes fadeInLine {
+    to { opacity: 1; }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 28px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0;
+    animation: navIn 0.8s 0.3s var(--transition) forwards;
+  }
+  @keyframes navIn { to { opacity: 1; } }
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--fg-muted);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+    align-items: center;
+  }
+  .nav-links a {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -3px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.4s var(--transition);
+  }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-links a:hover::after { width: 100%; }
+  .theme-toggle {
+    background: none; border: 1px solid var(--border);
+    color: var(--fg-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 6px 14px;
+    cursor: none;
+    transition: all 0.3s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-line {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: lineGrow 1.2s 1.2s var(--transition) forwards;
+  }
+  @keyframes lineGrow { to { transform: scaleX(1); } }
+  .hero-index {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: riseIn 0.8s 1.4s var(--transition) forwards;
+  }
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(56px, 9vw, 130px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+  }
+  .hero-name .word {
+    display: block;
+    clip-path: inset(0 0 100% 0);
+    animation: revealWord 1s var(--transition) forwards;
+  }
+  .hero-name .word:nth-child(1) { animation-delay: 1.5s; }
+  .hero-name .word:nth-child(2) { animation-delay: 1.7s; }
+  .hero-name .word:nth-child(3) { animation-delay: 1.9s; color: var(--accent); font-style: italic; }
+  @keyframes revealWord { to { clip-path: inset(0 0 0% 0); } }
+  .hero-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 48px;
+    opacity: 0;
+    animation: riseIn 0.8s 2.4s var(--transition) forwards;
+  }
+  .hero-role {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    line-height: 2;
+  }
+  .hero-role span { display: block; }
+  .hero-scroll {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 40px; height: 1px;
+    background: var(--fg-muted);
+    animation: scrollPulse 2s 3s infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { width: 40px; opacity: 0.4; }
+    50% { width: 70px; opacity: 1; }
+  }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTIONS */
+  section { padding: 140px 48px; }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  /* ABOUT */
+  #about { border-top: 1px solid var(--border); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    max-width: 1100px;
+  }
+  .about-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 4vw, 58px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .about-headline em { font-style: italic; color: var(--accent); }
+  .about-body {
+    font-size: 13px;
+    line-height: 2;
+    color: var(--fg-muted);
+  }
+  .about-body p { margin-bottom: 20px; }
+  .about-body strong { color: var(--fg); font-weight: 400; }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    grid-column: 1 / -1;
+  }
+  .stat-item {}
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-top: 8px;
+  }
+
+  /* PROJECTS */
+  #projects { border-top: 1px solid var(--border); }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    transition: background 0.4s, border-color 0.4s;
+    position: relative;
+    overflow: hidden;
+    transform: translateY(40px);
+    opacity: 0;
+    transition: transform 0.8s var(--transition), opacity 0.8s var(--transition), background 0.4s, border-color 0.4s;
+  }
+  .project-card.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-dim);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .project-card:hover::before { opacity: 1; }
+  .project-card:hover { border-color: rgba(200,169,110,0.25); }
+  .project-number {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--fg-muted);
+    margin-bottom: 20px;
+  }
+  .project-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 3.5vw, 52px);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .project-tagline {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .project-desc {
+    font-size: 12px;
+    line-height: 1.9;
+    color: var(--fg-muted);
+    max-width: 420px;
+  }
+  .project-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-end;
+  }
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .tag {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .project-card:hover .tag { border-color: var(--accent); color: var(--fg); }
+  .project-status {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .project-visual {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 45%;
+    opacity: 0.04;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 180px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg);
+    pointer-events: none;
+    transition: opacity 0.4s;
+    letter-spacing: -0.05em;
+  }
+  .project-card:hover .project-visual { opacity: 0.08; }
+
+  /* STACK */
+  #stack { border-top: 1px solid var(--border); }
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 2px;
+    max-width: 900px;
+  }
+  .stack-item {
+    padding: 28px 24px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    transition: all 0.3s;
+    transform: translateY(20px);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stack-item.visible { transform: translateY(0); opacity: 1; }
+  .stack-item:hover { border-color: var(--accent); color: var(--fg); background: var(--accent-dim); }
+  .stack-category {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* CONTACT */
+  #contact { border-top: 1px solid var(--border); }
+  .contact-inner {
+    max-width: 800px;
+  }
+  .contact-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin-bottom: 64px;
+  }
+  .contact-heading em { font-style: italic; color: var(--accent); }
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .contact-link-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.3s;
+    group: true;
+  }
+  .contact-link-row:hover { padding-left: 12px; }
+  .contact-link-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    transition: color 0.3s;
+  }
+  .contact-link-row:hover .contact-link-label { color: var(--accent); }
+  .contact-link-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+  .contact-arrow { font-size: 18px; color: var(--fg-muted); transition: transform 0.3s, color 0.3s; }
+  .contact-link-row:hover .contact-arrow { transform: translate(4px, -4px); color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.9s var(--transition), transform 0.9s var(--transition);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    #hero { padding: 0 24px 60px; }
+    section { padding: 80px 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .project-card { grid-template-columns: 1fr; gap: 24px; padding: 32px 24px; }
+    .project-meta { align-items: flex-start; }
+    .project-tags { justify-content: flex-start; }
+    footer { padding: 28px 24px; flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-terminal" id="terminal"></div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar" id="loaderBar"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">GMM</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle">Light</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-line"></div>
+  <div class="hero-index">Software Developer — Nairobi, KE</div>
+  <h1 class="hero-name">
+    <span class="word">Gift</span>
+    <span class="word">Mwirigi</span>
+    <span class="word">Maina.</span>
+  </h1>
+  <div class="hero-bottom">
+    <div class="hero-role">
+      <span>Full-Stack Engineer</span>
+      <span>Product Builder</span>
+      <span>Systems Thinker</span>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      Scroll
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">About</div>
+  <div class="about-grid">
+    <div class="reveal">
+      <h2 class="about-headline">
+        Building software that <em>moves</em> people.
+      </h2>
+    </div>
+    <div class="reveal" style="transition-delay:0.15s">
+      <div class="about-body">
+        <p>I'm a software developer based in Nairobi, Kenya — obsessed with the intersection of <strong>elegant engineering</strong> and <strong>real-world impact</strong>. I build full-stack systems that are fast, thoughtful, and alive.</p>
+        <p>From POS platforms serving local businesses, to flight concierge experiences and agricultural tech — I care about software that <strong>solves problems that actually matter</strong> to people.</p>
+        <p>I work primarily with <strong>Node.js, React, PostgreSQL</strong> and Firebase — with a bias toward shipping fast and refining constantly.</p>
+      </div>
+    </div>
+    <div class="about-stats reveal" style="transition-delay:0.3s">
+      <div class="stat-item">
+        <div class="stat-number">3+</div>
+        <div class="stat-label">Products in Development</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Problems Worth Solving</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">Selected Work</div>
+  <div class="projects-grid">
+
+    <!-- SynqWave -->
+    <div class="project-card">
+      <div class="project-visual">SW</div>
+      <div>
+        <div class="project-number">001</div>
+        <div class="project-name">SynqWave</div>
+        <div class="project-tagline">Real-time Emotion Tracking Synthesized with Music</div>
+        <p class="project-desc">A synchronization layer for distributed teams — enabling real-time data flow, presence detection, and collaborative state management across devices and users. Built for speed at scale.</p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status">
+          <div class="status-dot"></div>
+          In Development
+        </div>
+        <div class="project-tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">WebSockets</span>
+          <span class="tag">React</span>
+          <span class="tag">Redis</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AgriTrack -->
+    <div class="project-card" style="transition-delay:0.1s">
+      <div class="project-visual">AT</div>
+      <div>
+        <div class="project-number">002</div>
+        <div class="project-name">AgriTrack</div>
+        <div class="project-tagline">Digital inventory for the modern farmer</div>
+        <p class="project-desc">A mobile-first farm management platform that digitizes crop cycles, input inventory, and yield records. Designed for Kenyan smallholder farmers — offline-capable, frictionless, built on Firebase.</p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status">
+          <div class="status-dot"></div>
+          In Development
+        </div>
+        <div class="project-tags">
+          <span class="tag">Firebase</span>
+          <span class="tag">React Native</span>
+          <span class="tag">Firestore</span>
+          <span class="tag">Offline-first</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AureviaX -->
+    <div class="project-card" style="transition-delay:0.2s">
+      <div class="project-visual">AX</div>
+      <div>
+        <div class="project-number">003</div>
+        <div class="project-name">AureviaX</div>
+        <div class="project-tagline">Premium flight concierge, reimagined</div>
+        <p class="project-desc">A luxury travel intelligence platform offering curated flight experiences, private charter coordination, and VIP ground handling. Bridging high-net-worth travelers with bespoke aviation services — effortlessly.</p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status">
+          <div class="status-dot"></div>
+          In Development
+        </div>
+        <div class="project-tags">
+          <span class="tag">React</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">Flight APIs</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="section-label">Skills & Stack</div>
+  <div class="stack-grid">
+    <div class="stack-item" style="transition-delay:0.00s"><div class="stack-category">Runtime</div>Node.js</div>
+    <div class="stack-item" style="transition-delay:0.05s"><div class="stack-category">Frontend</div>React</div>
+    <div class="stack-item" style="transition-delay:0.10s"><div class="stack-category">Database</div>PostgreSQL</div>
+    <div class="stack-item" style="transition-delay:0.15s"><div class="stack-category">BaaS</div>Firebase</div>
+    <div class="stack-item" style="transition-delay:0.20s"><div class="stack-category">API</div>REST / Express</div>
+    <div class="stack-item" style="transition-delay:0.25s"><div class="stack-category">Auth</div>JWT / RBAC</div>
+    <div class="stack-item" style="transition-delay:0.30s"><div class="stack-category">Mobile</div>React Native</div>
+    <div class="stack-item" style="transition-delay:0.35s"><div class="stack-category">Payments</div>M-Pesa Daraja</div>
+    <div class="stack-item" style="transition-delay:0.40s"><div class="stack-category">DevOps</div>Nginx / PM2</div>
+    <div class="stack-item" style="transition-delay:0.45s"><div class="stack-category">Cloud</div>Hetzner VPS</div>
+    <div class="stack-item" style="transition-delay:0.50s"><div class="stack-category">Realtime</div>WebSockets</div>
+    <div class="stack-item" style="transition-delay:0.55s"><div class="stack-category">Version Control</div>Git / GitHub</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Get In Touch</div>
+  <div class="contact-inner reveal">
+    <h2 class="contact-heading">
+      Let's build<br>something <em>worth</em><br>remembering.
+    </h2>
+    <div class="contact-links">
+      <a href="mailto:gift@example.com" class="contact-link-row">
+        <span class="contact-link-label">Email</span>
+        <span class="contact-link-value">gift@example.com</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="#" class="contact-link-row">
+        <span class="contact-link-label">GitHub</span>
+        <span class="contact-link-value">github.com/gift-mwirigi</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="#" class="contact-link-row">
+        <span class="contact-link-label">LinkedIn</span>
+        <span class="contact-link-value">linkedin.com/in/gift-mwirigi</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="#" class="contact-link-row">
+        <span class="contact-link-label">Twitter / X</span>
+        <span class="contact-link-value">@giftmwirigi</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 Gift Mwirigi Maina</span>
+  <span>Nairobi, Kenya</span>
+  <span>Designed & Built with intention</span>
+</footer>
+
+<script>
+  // CURSOR
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, .project-card').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hovered'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hovered'));
+  });
+
+  // LOADER
+  const lines = [
+    { text: '> Initializing portfolio...', cls: '', delay: 0 },
+    { text: 'NAME  : Gift Mwirigi Maina', cls: 'bright', delay: 400 },
+    { text: 'ROLE  : Software Developer', cls: 'bright', delay: 700 },
+    { text: 'BASE  : Nairobi, Kenya', cls: 'bright', delay: 1000 },
+    { text: 'STACK : Node / React / PostgreSQL', cls: 'bright', delay: 1300 },
+    { text: '> Systems ready.', cls: 'accent', delay: 1700 },
+    { text: '> Entering...', cls: 'accent', delay: 2100 },
+  ];
+  const terminal = document.getElementById('terminal');
+  const loaderBar = document.getElementById('loaderBar');
+  let barVal = 0;
+  const barInterval = setInterval(() => {
+    barVal = Math.min(barVal + Math.random() * 8, 95);
+    loaderBar.style.width = barVal + '%';
+  }, 120);
+  lines.forEach(({ text, cls, delay }) => {
+    setTimeout(() => {
+      const p = document.createElement('p');
+      p.className = 'line' + (cls ? ' ' + cls : '');
+      p.textContent = text;
+      terminal.appendChild(p);
+    }, delay);
+  });
+  setTimeout(() => {
+    clearInterval(barInterval);
+    loaderBar.style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+    }, 500);
+  }, 2800);
+
+  // THEME TOGGLE
+  const toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', () => {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    toggle.textContent = isDark ? 'Dark' : 'Light';
+  });
+
+  // SCROLL REVEAL
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal, .project-card, .stack-item').forEach(el => {
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
